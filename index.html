@@ -12,11 +12,22 @@
     <div class="container">
         <h1>Shopping List</h1>
         <form id="js-shopping-list-form">
-            <label for="shopping-list-entry">Add an item</label>
+            <label for="shopping-list-entry">Add an item to your list</label>
             <input type="text" name="shopping-list-entry" class="js-shopping-list-entry" placeholder="e.g., broccoli">
-            <button type="submit">Add item</button>
+            <button type="submit">Add</button>
+        </form>
+        <form id="js-shopping-search-form">
+            <label for="shopping-list-search">Search your shopping list</label>
+            <input type="text" name="shopping-list-search" class="js-shopping-list-search" placeholder="Search">
+            <button type="submit">Search</button>
+            <button type="button" id="reset-results">Show all</button>
+            <div>
+                <input type="checkbox" id="show_not_purchased" name="unpurchase_items">
+                <label for='unpurchase_items' >Show items not purchased yet</label>
+            </div>
         </form>
         <ul class="shopping-list js-shopping-list">
+            
         </ul>
     </div>
     <script src="//code.jquery.com/jquery.min.js"></script>
