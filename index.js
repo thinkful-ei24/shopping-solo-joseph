@@ -12,14 +12,11 @@ const STORE = {
   nextId: 7
 };
 
-// Implement the following features which will require a more complex store object:
-// User can press a switch/checkbox to toggle between 
-// displaying all items or displaying only items that are unchecked
-// User can type in a search term and the displayed 
-// list will be filtered by item names only containing that search term
-// User can edit the title of an item
+function toggleDisplayItemsNotChecked(){
+  STORE.displayChecked = !STORE.displayChecked;
+}
 
-function generateItemElement(item, itemIndex, template) {
+function generateItemElement(item) {
   return `
   <li class="js-item-index-element" data-item-index="${item.id}">
     <span id="js-shopping-item" class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
@@ -44,62 +41,6 @@ function generateItemElement(item, itemIndex, template) {
   </li>`;
 }
 
-function editItem(itemId,value){
-  const item = getItemById(itemId);
-  item.name = value;
-}
-
-function handleItemEdit(){
-  $('.js-shopping-list')
-    .on('click', '.js-shopping-list-edit-button',function(e){
-      e.preventDefault();
-      const val = $(this).prev().val();
-      const id = getItemIndexFromElement(e.currentTarget);
-      editItem(id,val);
-      renderShoppingList();
-    });
-}
-
-function showHideEditForm(){
-  $('.js-shopping-list')
-    .on('click', '.shopping-item-edit',function (e) {
-      e.preventDefault();
-      $(this)
-        .parents('.js-item-index-element')
-        .children('.edit-item-form-wrapper')
-        .toggleClass('hidden');
-      $(this)
-        .parents('.js-item-index-element')
-        .children('#js-shopping-item')
-        .toggleClass('hide-span');
-    });
- 
-}
-
-function searchItems(searchTerm){
-  let searchItems = [...STORE.items];
-  searchItems = searchItems.filter(item => item.name.includes(searchTerm) );
-  return searchItems;
-}
-
-function handleItemSearch(){
-  $('#js-shopping-search-form').submit(function(e){
-    e.preventDefault();
-    const searchTerm = $('.js-shopping-list-search').val();
-    $('.js-shopping-list-search').val('');
-    STORE.searchTerm = searchTerm;
-    renderShoppingList();
-  });  
-}
-
-function resetResults(){
-  $('#reset-results')
-    .on('click', e => {
-      STORE.searchTerm = null;
-      renderShoppingList();
-    }); 
-}
-
 function generateItemsForDisplay(){
   let displayItems = [...STORE.items];
   if (STORE.displayChecked){
@@ -117,10 +58,50 @@ function generateShoppingItemsString() {
     .join('');
 }
 
-function renderShoppingList(){
-  // console.log('renderShoppingList ran');
-  const shoppingListItemsString = generateShoppingItemsString();
-  $('.js-shopping-list').html(shoppingListItemsString);
+function getItemById(id){
+  const shoppingItem = STORE.items.find(item => item.id === id);
+  return shoppingItem;
+}
+
+function getItemIndexFromElement(item){
+  const itemIndexString = $(item)
+    .closest('.js-item-index-element')
+    .attr('data-item-index');
+  return parseInt(itemIndexString, 10);
+}
+
+function addItemToShoppingList(itemName) {
+  STORE.items.push({id: STORE.nextId, name: itemName, checked: false});
+  STORE.nextId++;
+}
+
+function editItem(itemId,value){
+  const item = getItemById(itemId);
+  item.name = value;
+}
+
+function deletItemFromStore(id){
+  const index = STORE.items.findIndex(item => item.id === id);
+  STORE.items.splice(index,1);
+}
+
+function searchItems(searchTerm){
+  let searchItems = [...STORE.items];
+  searchItems = searchItems.filter(item => item.name.includes(searchTerm) );
+  return searchItems;
+}
+
+function toggleCheckedForListItem(id){
+  const item = getItemById(id);
+  item.checked = !item.checked;
+}
+
+function resetResults(){
+  $('#reset-results')
+    .on('click', e => {
+      STORE.searchTerm = null;
+      renderShoppingList();
+    }); 
 }
 
 function handleNewItemSubmit(){
@@ -133,8 +114,33 @@ function handleNewItemSubmit(){
   });  
 }
 
-function toggleDisplayItemsNotChecked(){
-  STORE.displayChecked = !STORE.displayChecked;
+function handleItemEdit(){
+  $('.js-shopping-list')
+    .on('click', '.js-shopping-list-edit-button',function(e){
+      e.preventDefault();
+      const val = $(this).prev().val();
+      const id = getItemIndexFromElement(e.currentTarget);
+      editItem(id,val);
+      renderShoppingList();
+    });
+}
+
+function handleDeleteItemClicked(){
+  $('.js-shopping-list').on('click', '.js-item-delete', e => {
+    e.preventDefault();
+    const itemIndex = getItemIndexFromElement(e.currentTarget);
+    deletItemFromStore(itemIndex);
+    renderShoppingList();
+  });
+}
+
+function handleItemCheckClicked(){
+  $('.js-shopping-list').on('click','.js-item-toggle', e => {
+    e.preventDefault();
+    const itemIndex = getItemIndexFromElement(e.currentTarget);
+    toggleCheckedForListItem(itemIndex);
+    renderShoppingList();
+  });
 }
 
 function handleItemsNotChecked(){
@@ -144,60 +150,32 @@ function handleItemsNotChecked(){
   });
 }
 
-function addItemToShoppingList(itemName) {
-  console.log(`Adding ${itemName} to shopping list`);
-  STORE.items.push({id: STORE.nextId, name: itemName, checked: false});
-  STORE.nextId++;
-}
-
-function getItemIndexFromElement(item){
-  const itemIndexString = $(item)
-    .closest('.js-item-index-element')
-    .attr('data-item-index');
-    console.log(itemIndexString)
-  return parseInt(itemIndexString, 10);
-}
-
-function toggleCheckedForListItem(id){
-  console.log('toggling check property for item at index ' + id);
-  item = getItemById(id);
-  item.checked = !item.checked;
-  // STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
-}
-
-function handleItemCheckClicked(){
-  $('.js-shopping-list').on('click','.js-item-toggle', e => {
+function handleItemSearch(){
+  $('#js-shopping-search-form').submit(function(e){
     e.preventDefault();
-    console.log('handleItemCheckClicked ran');
-    const itemIndex = getItemIndexFromElement(e.currentTarget);
-    toggleCheckedForListItem(itemIndex);
+    const searchTerm = $('.js-shopping-list-search').val();
+    $('.js-shopping-list-search').val('');
+    STORE.searchTerm = searchTerm;
     renderShoppingList();
-  });
+  });  
 }
 
-function deletItemFromStore(id){
-  index = STORE.items.findIndex(item => item.id === id);
-  STORE.items.splice(index,1);
-}
- 
-function getItemById(id){
-  const shoppingItem = STORE.items.find(item => item.id === id);
-  return shoppingItem;
-}
-
-function handleDeleteItemClicked(){
-  
-  $('.js-shopping-list').on('click', '.js-item-delete', e => {
-    e.preventDefault();
-    console.log('handleDeleteItemClicked ran');
-    const itemIndex = getItemIndexFromElement(e.currentTarget);
-    deletItemFromStore(itemIndex);
-    renderShoppingList();
-  });
+function showHideEditForm(){
+  $('.js-shopping-list')
+    .on('click', '.shopping-item-edit',function (e) {
+      e.preventDefault();
+      $(this)
+        .parents('.js-item-index-element')
+        .children('.edit-item-form-wrapper')
+        .toggleClass('hidden');
+      $(this)
+        .parents('.js-item-index-element')
+        .children('#js-shopping-item')
+        .toggleClass('hide-span');
+    });
 }
 
-function handleShoppingList() {
-  renderShoppingList();
+function attachHandlers(){
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
@@ -206,6 +184,16 @@ function handleShoppingList() {
   resetResults();
   handleItemEdit();
   showHideEditForm();
+}
+
+function renderShoppingList(){
+  const shoppingListItemsString = generateShoppingItemsString();
+  $('.js-shopping-list').html(shoppingListItemsString);
+}
+
+function handleShoppingList() {
+  renderShoppingList();
+  attachHandlers();
 }
 
 $(handleShoppingList);
