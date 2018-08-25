@@ -22,11 +22,11 @@ function generateItemElement(item, itemIndex, template) {
   return `
   <li class="js-item-index-element" data-item-index="${itemIndex}">
     <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
-    <form id="js-shopping-item-edit-form">
-    <label for="shopping-list-item-edit">Edit this item</label>
-    <input type="text" name="shopping-list-edit" class="js-shopping-list-item-edit" placeholder="${item.name}">
-    <button type="submit">Finish</button>
-</form>
+    <form id="shopping-list-item-edit-form">
+      <label for="shopping-list-item-edit">Edit this item</label>
+      <input type="text" name="shopping-list-item-edit" class="js-shopping-list-item-edit" placeholder="${item.name}">
+      <button type="button" class="js-shopping-list-edit-button">Finish</button>
+    </form>
     <div class="shopping-item-controls">
       <button class="shopping-item-toggle js-item-toggle">
           <span class="button-label">check</span>
@@ -39,6 +39,21 @@ function generateItemElement(item, itemIndex, template) {
       </button>
     </div>
   </li>`;
+}
+
+function editItem(index,value){
+  STORE.items[index].name = value;
+}
+
+function handleItemEdit(){
+  $('.js-shopping-list')
+    .on('click', '.js-shopping-list-edit-button',function(e){
+      e.preventDefault();
+      const val = $(this).prev().val();
+      const index = $(this).parents('.js-item-index-element').attr('data-item-index');
+      editItem(index,val);
+      renderShoppingList();
+    });
 }
 
 function searchItems(searchTerm){
@@ -101,6 +116,8 @@ function handleNewItemSubmit(){
   });  
 }
 
+
+
 function toggleDisplayItemsNotChecked(){
   STORE.displayChecked = !STORE.displayChecked;
 }
@@ -143,8 +160,9 @@ function deletItemFromStore(index){
   STORE.items.splice(index,1);
 }
 
+
 function handleDeleteItemClicked(){
-  console.log('handleDeleteItemClicked ran');
+  // console.log('handleDeleteItemClicked ran');
   $('.js-shopping-list').on('click', '.js-item-delete', e => {
     const itemIndex = getItemIndexFromElement(e.currentTarget);
     deletItemFromStore(itemIndex);
@@ -160,6 +178,7 @@ function handleShoppingList() {
   handleItemsNotChecked();
   handleItemSearch();
   resetResults();
+  handleItemEdit();
 }
 
 $(handleShoppingList);
