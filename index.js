@@ -1,14 +1,15 @@
 const STORE = {
   items: [
-    {name: 'apples', checked: false},
-    {name: 'apples', checked: false},
-    {name: 'ples', checked: false},
-    {name: 'oranges', checked: false},
-    {name: 'milk', checked: true},
-    {name: 'bread', checked: false}
+    {id: 1, name: 'apples', checked: false},
+    {id: 2, name: 'apples', checked: false},
+    {id: 3, name: 'ples', checked: false},
+    {id: 4, name: 'oranges', checked: false},
+    {id: 5, name: 'milk', checked: true},
+    {id: 6, name: 'bread', checked: false}
   ],
   displayChecked: false,
-  searchTerm: null
+  searchTerm: null,
+  nextId: 7
 };
 
 // Implement the following features which will require a more complex store object:
@@ -20,7 +21,7 @@ const STORE = {
 
 function generateItemElement(item, itemIndex, template) {
   return `
-  <li class="js-item-index-element" data-item-index="${itemIndex}">
+  <li class="js-item-index-element" data-item-index="${item.id}">
     <span id="js-shopping-item" class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
     <div class="edit-item-form-wrapper hidden">
       <form id="shopping-list-item-edit-form>
@@ -43,8 +44,9 @@ function generateItemElement(item, itemIndex, template) {
   </li>`;
 }
 
-function editItem(index,value){
-  STORE.items[index].name = value;
+function editItem(itemId,value){
+  const item = getItemById(itemId);
+  item.name = value;
 }
 
 function handleItemEdit(){
@@ -52,8 +54,8 @@ function handleItemEdit(){
     .on('click', '.js-shopping-list-edit-button',function(e){
       e.preventDefault();
       const val = $(this).prev().val();
-      const index = $(this).parents('.js-item-index-element').attr('data-item-index');
-      editItem(index,val);
+      const id = getItemIndexFromElement(e.currentTarget);
+      editItem(id,val);
       renderShoppingList();
     });
 }
@@ -98,9 +100,6 @@ function resetResults(){
     }); 
 }
 
-
-
-
 function generateItemsForDisplay(){
   let displayItems = [...STORE.items];
   if (STORE.displayChecked){
@@ -134,8 +133,6 @@ function handleNewItemSubmit(){
   });  
 }
 
-
-
 function toggleDisplayItemsNotChecked(){
   STORE.displayChecked = !STORE.displayChecked;
 }
@@ -147,25 +144,28 @@ function handleItemsNotChecked(){
   });
 }
 
-function toggleCheckedForListItem(itemIndex){
-  console.log('toggling check property for item at index ' + itemIndex);
-  STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
-}
-
 function addItemToShoppingList(itemName) {
   console.log(`Adding ${itemName} to shopping list`);
-  STORE.items.push({name: itemName, checked: false});
+  STORE.items.push({id: STORE.nextId, name: itemName, checked: false});
+  STORE.nextId++;
 }
 
 function getItemIndexFromElement(item){
   const itemIndexString = $(item)
     .closest('.js-item-index-element')
     .attr('data-item-index');
+    console.log(itemIndexString)
   return parseInt(itemIndexString, 10);
 }
 
-function handleItemCheckClicked(){
+function toggleCheckedForListItem(id){
+  console.log('toggling check property for item at index ' + id);
+  item = getItemById(id);
+  item.checked = !item.checked;
+  // STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
+}
 
+function handleItemCheckClicked(){
   $('.js-shopping-list').on('click','.js-item-toggle', e => {
     e.preventDefault();
     console.log('handleItemCheckClicked ran');
@@ -175,10 +175,15 @@ function handleItemCheckClicked(){
   });
 }
 
-function deletItemFromStore(index){
+function deletItemFromStore(id){
+  index = STORE.items.findIndex(item => item.id === id);
   STORE.items.splice(index,1);
 }
-
+ 
+function getItemById(id){
+  const shoppingItem = STORE.items.find(item => item.id === id);
+  return shoppingItem;
+}
 
 function handleDeleteItemClicked(){
   
