@@ -21,12 +21,14 @@ const STORE = {
 function generateItemElement(item, itemIndex, template) {
   return `
   <li class="js-item-index-element" data-item-index="${itemIndex}">
-    <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
-    <form id="shopping-list-item-edit-form">
-      <label for="shopping-list-item-edit">Edit this item</label>
-      <input type="text" name="shopping-list-item-edit" class="js-shopping-list-item-edit" placeholder="${item.name}">
-      <button type="button" class="js-shopping-list-edit-button">Finish</button>
-    </form>
+    <span id="js-shopping-item" class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
+    <div class="edit-item-form-wrapper hidden">
+      <form id="shopping-list-item-edit-form>
+        <label for="shopping-list-item-edit">Edit this item</label>
+        <input type="text" name="shopping-list-item-edit" class="js-shopping-list-item-edit" value="${item.name}">
+        <button type="button" class="js-shopping-list-edit-button">Finish</button>
+      </form>
+    </div>
     <div class="shopping-item-controls">
       <button class="shopping-item-toggle js-item-toggle">
           <span class="button-label">check</span>
@@ -54,6 +56,22 @@ function handleItemEdit(){
       editItem(index,val);
       renderShoppingList();
     });
+}
+
+function showHideEditForm(){
+  $('.js-shopping-list')
+    .on('click', '.shopping-item-edit',function (e) {
+      e.preventDefault();
+      $(this)
+        .parents('.js-item-index-element')
+        .children('.edit-item-form-wrapper')
+        .toggleClass('hidden');
+      $(this)
+        .parents('.js-item-index-element')
+        .children('#js-shopping-item')
+        .toggleClass('hide-span');
+    });
+ 
 }
 
 function searchItems(searchTerm){
@@ -147,8 +165,9 @@ function getItemIndexFromElement(item){
 }
 
 function handleItemCheckClicked(){
-  // console.log('handleItemCheckClicked ran');
+
   $('.js-shopping-list').on('click','.js-item-toggle', e => {
+    e.preventDefault();
     console.log('handleItemCheckClicked ran');
     const itemIndex = getItemIndexFromElement(e.currentTarget);
     toggleCheckedForListItem(itemIndex);
@@ -162,8 +181,10 @@ function deletItemFromStore(index){
 
 
 function handleDeleteItemClicked(){
-  // console.log('handleDeleteItemClicked ran');
+  
   $('.js-shopping-list').on('click', '.js-item-delete', e => {
+    e.preventDefault();
+    console.log('handleDeleteItemClicked ran');
     const itemIndex = getItemIndexFromElement(e.currentTarget);
     deletItemFromStore(itemIndex);
     renderShoppingList();
@@ -179,6 +200,7 @@ function handleShoppingList() {
   handleItemSearch();
   resetResults();
   handleItemEdit();
+  showHideEditForm();
 }
 
 $(handleShoppingList);
