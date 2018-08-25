@@ -21,10 +21,10 @@ function generateItemElement(item) {
   <li class="js-item-index-element" data-item-index="${item.id}">
     <span id="js-shopping-item" class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
     <div class="edit-item-form-wrapper hidden">
-      <form id="shopping-list-item-edit-form>
+      <form class="shopping-list-item-edit-form">
         <label for="shopping-list-item-edit">Edit this item</label>
         <input type="text" name="shopping-list-item-edit" class="js-shopping-list-item-edit" value="${item.name}">
-        <button type="button" class="js-shopping-list-edit-button">Finish</button>
+        <button type="submit" class="js-shopping-list-edit-button">Finish</button>
       </form>
     </div>
     <div class="shopping-item-controls">
@@ -105,7 +105,7 @@ function resetResults(){
 }
 
 function handleNewItemSubmit(){
-  $('#js-shopping-list-form').submit(function(e){
+  $('#js-shopping-list-form').submit(e => {
     e.preventDefault();
     const newItemName = $('.js-shopping-list-entry').val();
     $('.js-shopping-list-entry').val('');
@@ -116,9 +116,9 @@ function handleNewItemSubmit(){
 
 function handleItemEdit(){
   $('.js-shopping-list')
-    .on('click', '.js-shopping-list-edit-button',function(e){
+    .on('submit', '.shopping-list-item-edit-form', e => {
       e.preventDefault();
-      const val = $(this).prev().val();
+      const val = $(e.currentTarget).children('.js-shopping-list-item-edit').val();
       const id = getItemIndexFromElement(e.currentTarget);
       editItem(id,val);
       renderShoppingList();
@@ -151,7 +151,7 @@ function handleItemsNotChecked(){
 }
 
 function handleItemSearch(){
-  $('#js-shopping-search-form').submit(function(e){
+  $('#js-shopping-search-form').submit(e => {
     e.preventDefault();
     const searchTerm = $('.js-shopping-list-search').val();
     $('.js-shopping-list-search').val('');
@@ -162,7 +162,7 @@ function handleItemSearch(){
 
 function showHideEditForm(){
   $('.js-shopping-list')
-    .on('click', '.shopping-item-edit',function (e) {
+    .on('click', '.shopping-item-edit', function(e) {
       e.preventDefault();
       $(this)
         .parents('.js-item-index-element')
